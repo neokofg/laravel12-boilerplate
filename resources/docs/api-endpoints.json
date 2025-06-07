@@ -1,0 +1,278 @@
+{
+    "info": {
+        "title": "Easydocx API",
+        "version": "0.0.1",
+        "description": "API для работы с Easydocx - система управления документами",
+        "base_url": "https://api.easydocx.com/api/v1"
+    },
+    "authentication": {
+        "type": "Bearer Token",
+        "header": "Authorization: Bearer {token}",
+        "description": "Все защищенные endpoints требуют Bearer токен в заголовке Authorization. Токен получается при успешной авторизации."
+    },
+    "groups": {
+        "auth": {
+            "name": "Authentication",
+            "description": "Endpoints для аутентификации пользователей",
+            "endpoints": {
+                "register": {
+                    "method": "POST",
+                    "path": "/auth/register",
+                    "title": "User Registration",
+                    "description": "Регистрирует нового пользователя в системе",
+                    "auth_required": false,
+                    "rate_limit": "3 requests per hour",
+                    "request": {
+                        "headers": {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json"
+                        },
+                        "body": {
+                            "email": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Email адрес пользователя (должен быть уникальным)",
+                                "example": "ivan@example.com"
+                            },
+                            "password": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Пароль пользователя (от 8 до 32 символов)",
+                                "example": "password123"
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Пользователь успешно зарегистрирован",
+                            "example": {
+                                "data": {
+                                    "token": "1|xyz789abc456def123ghi890jkl567mno234pqr891stu345vwx",
+                                    "valid_until": "2024-02-15 14:30:00"
+                                },
+                                "message": "Successful"
+                            }
+                        },
+                        "422": {
+                            "description": "Ошибки валидации",
+                            "example": {
+                                "message": "Invalid data",
+                                "data": {
+                                    "email": ["Пользователь с таким email уже существует"],
+                                    "password": ["Пароль должен содержать от 8 до 32 символов"]
+                                }
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X POST https://api.easydocx.com/api/v1/auth/register \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"ivan@example.com\",\n    \"password\": \"password123\"\n  }'",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/api/v1/auth/register', {\n  method: 'POST',\n  headers: {\n    'Accept': 'application/json',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({\n    email: 'ivan@example.com',\n    password: 'password123'\n  })\n});\n\nconst data = await response.json();",
+                        "php": "$response = Http::post('https://api.easydocx.com/api/v1/auth/register', [\n    'email' => 'ivan@example.com',\n    'password' => 'password123'\n]);\n\n$data = $response->json();"
+                    }
+                },
+                "login": {
+                    "method": "POST",
+                    "path": "/auth/login",
+                    "title": "User Login",
+                    "description": "Авторизует пользователя в системе и возвращает токен доступа",
+                    "auth_required": false,
+                    "rate_limit": "5 requests per minute",
+                    "request": {
+                        "headers": {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json"
+                        },
+                        "body": {
+                            "email": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Email адрес пользователя",
+                                "example": "ivan@example.com"
+                            },
+                            "password": {
+                                "type": "string",
+                                "required": true,
+                                "description": "Пароль пользователя",
+                                "example": "password123"
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Успешная авторизация",
+                            "example": {
+                                "message": "Successful",
+                                "data": {
+                                    "token": "1|abc123def456ghi789jkl012mno345pqr678stu901vwx234yz",
+                                    "valid_until": "2024-07-15 14:30:00"
+                                }
+                            }
+                        },
+                        "422": {
+                            "description": "Ошибки валидации",
+                            "example": {
+                                "message": "Invalid data",
+                                "data": {
+                                    "email": ["The email field is required."],
+                                    "password": ["The password field is required."]
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Неверные учетные данные",
+                            "example": {
+                                "message": "Invalid credentials"
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X POST https://api.easydocx.com/api/v1/auth/login \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"ivan@example.com\",\n    \"password\": \"password123\"\n  }'",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/api/v1/auth/login', {\n  method: 'POST',\n  headers: {\n    'Accept': 'application/json',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({\n    email: 'ivan@example.com',\n    password: 'password123'\n  })\n});\n\nconst data = await response.json();\nconst token = data.data.token;",
+                        "php": "$response = Http::post('https://api.easydocx.com/api/v1/auth/login', [\n    'email' => 'ivan@example.com',\n    'password' => 'password123'\n]);\n\n$token = $response->json('data.token');"
+                    }
+                },
+                "logout": {
+                    "method": "POST",
+                    "path": "/auth/logout",
+                    "title": "User Logout",
+                    "description": "Выходит из системы и аннулирует текущий токен",
+                    "auth_required": true,
+                    "rate_limit": "60 requests per minute",
+                    "request": {
+                        "headers": {
+                            "Authorization": "Bearer {token}",
+                            "Accept": "application/json"
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Успешный выход",
+                            "example": {
+                                "message": "Logged out successfully"
+                            }
+                        },
+                        "401": {
+                            "description": "Не авторизован",
+                            "example": {
+                                "message": "Unauthenticated"
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X POST https://api.easydocx.com/api/v1/auth/logout \\\n  -H \"Authorization: Bearer {token}\" \\\n  -H \"Accept: application/json\"",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/api/v1/auth/logout', {\n  method: 'POST',\n  headers: {\n    'Authorization': `Bearer ${token}`,\n    'Accept': 'application/json'\n  }\n});",
+                        "php": "$response = Http::withToken($token)\n    ->post('https://api.easydocx.com/api/v1/auth/logout');"
+                    }
+                }
+            }
+        },
+        "users": {
+            "name": "Users",
+            "description": "Endpoints для работы с пользователями",
+            "endpoints": {
+                "current": {
+                    "method": "GET",
+                    "path": "/user",
+                    "title": "Get Current User",
+                    "description": "Возвращает информацию о текущем авторизованном пользователе",
+                    "auth_required": true,
+                    "rate_limit": "120 requests per minute",
+                    "request": {
+                        "headers": {
+                            "Authorization": "Bearer {token}",
+                            "Accept": "application/json"
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Информация о пользователе",
+                            "example": {
+                                "data": {
+                                    "id": "01HKQVH2Y5N8Z7W6X4M3P2Q1R0",
+                                    "email": "ivan@example.com",
+                                    "name": "ivan",
+                                    "created_at": "2 days ago"
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Не авторизован",
+                            "example": {
+                                "message": "Unauthenticated"
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X GET https://api.easydocx.com/api/v1/user \\\n  -H \"Authorization: Bearer {token}\" \\\n  -H \"Accept: application/json\"",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/api/v1/user', {\n  headers: {\n    'Authorization': `Bearer ${token}`,\n    'Accept': 'application/json'\n  }\n});\n\nconst userData = await response.json();",
+                        "php": "$response = Http::withToken($token)\n    ->get('https://api.easydocx.com/api/v1/user');\n\n$user = $response->json('data');"
+                    }
+                }
+            }
+        },
+        "system": {
+            "name": "System",
+            "description": "Системные endpoints для проверки статуса",
+            "endpoints": {
+                "status": {
+                    "method": "GET",
+                    "path": "/",
+                    "title": "System Status",
+                    "description": "Проверяет статус работы системы",
+                    "auth_required": false,
+                    "rate_limit": "60 requests per minute",
+                    "request": {
+                        "headers": {
+                            "Accept": "application/json"
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Система работает",
+                            "example": {
+                                "success": true,
+                                "data": {
+                                    "status": ["all systems operational"]
+                                }
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X GET https://api.easydocx.com/ \\\n  -H \"Accept: application/json\"",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/', {\n  headers: {\n    'Accept': 'application/json'\n  }\n});\n\nconst data = await response.json();",
+                        "php": "$response = Http::get('https://api.easydocx.com/');\n\n$data = $response->json();"
+                    }
+                },
+                "test": {
+                    "method": "GET",
+                    "path": "/test",
+                    "title": "Test Endpoint",
+                    "description": "Тестовый endpoint для проверки соединения",
+                    "auth_required": false,
+                    "rate_limit": "60 requests per minute",
+                    "request": {
+                        "headers": {
+                            "Accept": "application/json"
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Успешный ответ",
+                            "example": {
+                                "success": true,
+                                "data": {
+                                    "test": ["pong"]
+                                }
+                            }
+                        }
+                    },
+                    "examples": {
+                        "curl": "curl -X GET https://api.easydocx.com/test \\\n  -H \"Accept: application/json\"",
+                        "javascript": "const response = await fetch('https://api.easydocx.com/test', {\n  headers: {\n    'Accept': 'application/json'\n  }\n});\n\nconst data = await response.json();",
+                        "php": "$response = Http::get('https://api.easydocx.com/test');\n\n$data = $response->json();"
+                    }
+                }
+            }
+        }
+    }
+}

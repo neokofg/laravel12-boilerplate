@@ -1,0 +1,65 @@
+services:
+    backend:
+        build: .
+        container_name: easydocx_backend
+        ports:
+            - "8000:8000"
+            - "9001:9001" #supervisor
+        environment:
+            - APP_ENV=local
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_DATABASE=laravel
+            - DB_USERNAME=laravel
+            - DB_PASSWORD=secret
+            - REDIS_HOST=redis
+        volumes:
+            - .:/var/www
+            - ./storage/logs:/var/log/supervisor
+        depends_on:
+            - postgres
+            - redis
+        networks:
+            - easydocx-network
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
+
+    postgres:
+        image: postgres:17-alpine
+        container_name: easydocx_postgres
+        environment:
+            - POSTGRES_DB=laravel
+            - POSTGRES_USER=laravel
+            - POSTGRES_PASSWORD=secret
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - easydocx-network
+        restart: unless-stopped
+
+    redis:
+        image: redis:7-alpine
+        container_name: easydocx_redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+        networks:
+            - easydocx-network
+        restart: unless-stopped
+        command: redis-server --appendonly yes
+
+volumes:
+    postgres_data:
+    redis_data:
+
+networks:
+    easydocx-network:
+        driver: bridge
